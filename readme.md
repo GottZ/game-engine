@@ -5,8 +5,8 @@
 
 ## what is this about?
 
-literarily some kind of try to create a game engine in plain vanilla js without any external dependencies.
-so far its not more than a pile of helper functions but it will evolve.
+literarily some kind of try to create a game engine in plain vanilla js without any external dependencies.  
+so far its not more than a pile of helper functions but it will evolve.  
 feel free to tamper with it. i'll add inline documentation as soon as i think something is „done“
 
 ## Live Demo
