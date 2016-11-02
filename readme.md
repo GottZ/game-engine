@@ -1,7 +1,7 @@
 ## GottZ Game Engine
 
 [![IRC Chat](https://img.shields.io/badge/IRC-/join%20%23gz-green.svg)](https://n0xy.net)
-[![IRC Link](https://img.shields.io/badge/IRC-ircs%3A%2F%2F-green.svg)](ircs://irc.n0xy.net:6697/#gz)
+[![IRC Link](https://img.shields.io/badge/IRC-ircs%3A%2F%2Firc.n0xy.net%3A6697%2F%23gz-green.svg)](https://tinyurl.com/j2mvnn3)
 [![Twitch Stream](https://img.shields.io/badge/Twitch-Noepel-blue.svg)](https://twitch.tv/Noepel)
 
 ## what is this about?
