@@ -1,0 +1,52 @@
+
+#ifdef GL_ES
+precision highp float;
+#endif
+
+#ifndef PI
+#define PI 3.141592653589793238462643383
+#endif
+
+uniform float time;
+uniform vec2 resolution;
+uniform sampler2D texture;
+
+float disp (float x) {
+	return max(0.0, min(1.0, smoothstep(-0.1, 1.1, x)));
+	//return pow(x, 2.0);
+	//return sqrt(x);
+}
+vec2 disp (vec2 x) {
+	return vec2(disp(x.x), disp(x.y));
+}
+
+void main (void) {
+	// render buffer resolution
+	vec2 R = resolution.xy;
+	// calculate the size of a pixel
+	float px = 1.0 / R.y;
+	// create percentages of the coordinate system
+	vec2 p = gl_FragCoord.xy / R;
+	// center the scene and add perspective
+	//vec2 uv = (2.0 * gl_FragCoord.xy - R) / min(R.x, R.y);
+
+
+	// i need to do something with p..
+	// i want it to be somewhat like an old tv screen.. well.. its hard to explain actually.
+
+	vec2 uv = p;
+
+	uv = disp(p) * 0.8 + p * 0.2;
+
+	vec4 color = texture2D(texture, uv);
+	//color = vec4(uv, color.z, 1.0);
+
+	// lets try creating something like scan lines
+	color = color + smoothstep(0.45, 1.0, mod(uv.y * 3.7132 + (time + uv.x * 0.8) / 6.0, 1.0) / 2.0) * 1.2;
+	color = color + smoothstep(0.45, 1.0, mod(uv.y * 1.13451 + (time + uv.x * (-2.0)) / 10.143, 1.0) / 2.0);
+	//color.x = uv.x;
+	//color.y = uv.y;
+	
+	gl_FragColor = color;
+}
+

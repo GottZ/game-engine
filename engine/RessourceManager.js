@@ -10,7 +10,9 @@
 	// ressourceTree ← ["./sounds/shot1.wav", "./sprites.png"]
 	module.init = (xhr, ressourceTree, EventManager) => {
 
-		const ressources = {Sounds:{},Raw:{},Images:{},JSON:{},Scripts:{}};
+		const ressources = {};
+		"Sounds,Raw,Images,JSON,Scripts,Fragment,Vertex"
+			.split(",").map(x=>ressources[x]={});
 
 		const ev = module.exports = new EventManager();
 		const ctx = new AudioContext();
@@ -41,12 +43,23 @@
 			ev.emit("loaded", path, ++loaded, count);
 		};
 
+		// TODO: CLEANUP! SRSLY
 		const reqXhr = path => xhr.get(path, res => {
 			if (/\.(wav|mp3)/i.test(path)) {
 				ctx.decodeAudioData(res.response, buff => {
 					ressources.Sounds[path] = ressources[path] = buff;
 					triggerLoaded(path);
 				});
+			}
+			else if (/\.(frag(?:ment)?)/i.test(path)) {
+				ressources.Fragment[path] = ressources[path] = String.fromCharCode.apply(null, new Uint8Array(res.response))
+					.replace(/\r?\n/g, "\r\n");
+				triggerLoaded(path);
+			}
+			else if (/\.(vert(?:ex)?)/i.test(path)) {
+				ressources.Vertex[path] = ressources[path] = String.fromCharCode.apply(null, new Uint8Array(res.response))
+					.replace(/\r?\n/g, "\r\n");
+				triggerLoaded(path);
 			}
 			else {
 				ressources.Raw[path] = ressources[path] = res.response;

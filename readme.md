@@ -16,6 +16,7 @@ feel free to tamper with it. i'll add inline documentation as soon as i think so
 ## Live Demo
 
 - [/qazijam8](https://gottz.github.io/game/qazijam8/)
+- [/qazijam8/webgl.htm](https://gottz.github.io/game/qazijam8/webgl.htm)
 - [/qazijam8/tools.htm](https://gottz.github.io/game/qazijam8/tools.htm)
 
 ## Documentation
