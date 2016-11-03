@@ -4,9 +4,9 @@
 
 	window.load = {
 		name: "ressourceTree",
-		exports: ["./sprites.png", "./test.vertex", "./test.fragment"],
+		exports: ["./sprites.png", "./tv_small.png", "./test.vertex", "./test.fragment"],
 		init: function () {
-			"Player,stars,sprites"
+			"Player,stars,sprites,Enemy"
 			.split(",").map(file => this.exports.push("./" + file + ".js"));
 
 			"Entity,Sprite,input,sounds"
@@ -20,10 +20,12 @@
 		name: "main"
 	};
 
-	module.init = (stars, input, overrides, Player, ents, sprites, console, ressources) => {
+	module.init = (stars, input, overrides, Enemy, Player, ents, sprites, console, ressources) => {
 		console.info("main loaded :D");
 
 		const player = new Player();
+		//const enemy = new Enemy();
+		const enemies = [...Array(6)].map(x=>new Enemy());
 
 		const up = input.hook({
 			keyboard: "w,up,KP_5",
@@ -50,19 +52,24 @@
 			keyboard: "space,KP_0,return"
 		});
 
+		const wrapper = ce("div", {
+			className: "screen",
+			parent: document.body
+		});
 
 		const ctx = ce("canvas", {
 			width: 512,
 			height: 512
 		}).getContext("2d");
 
+		// TODO: separete all the opengl stuff into a separate file.. srsly.. this will become a mess
 		let gl;
 		try {
 			gl = ce("canvas", {
 				id: "game",
 				width: 512,
 				height: 512,
-				parent: document.body
+				parent: wrapper
 			}).getContext("experimental-webgl");
 		}
 		catch (e) {
@@ -77,6 +84,11 @@
 		const reset = () => {
 			player.x = ctx.canvas.width / 2 | 0;
 			player.y = ctx.canvas.height - 20;
+
+			enemies.map((enemy, i) => {
+				enemy.x = player.x + 40 * i;
+				enemy.y = 50;
+			});
 		};
 
 		reset();
@@ -145,6 +157,7 @@
 		const uniforms = {
 			time: gl.getUniformLocation(prog, "time"),
 			resolution: gl.getUniformLocation(prog, "resolution"),
+			gameResolution: gl.getUniformLocation(prog, "gameResolution"),
 			texture: gl.getUniformLocation(prog, "texture")
 		};
 
@@ -191,8 +204,6 @@
 					ctx.drawText("haha", 140, 200);
 				}*/
 
-				player.draw(ctx);
-
 				if (fire.pressed) player.fire(ctx);
 
 				ents.tick({
@@ -205,11 +216,14 @@
 					v: player.v,
 					o: player.o
 				});
+
+				ents.draw(ctx);
 			}
 
 
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+			// this will turn the 2d canvas into a webgl texture that then can be used inside a fragment shader :D
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, ctx.canvas);
 			//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			//gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
@@ -223,6 +237,7 @@
 
 			gl.uniform1f(uniforms.time, currentTime / 1000);
 			gl.uniform2f(uniforms.resolution, gl.drawingBufferWidth, gl.drawingBufferHeight);
+			gl.uniform2f(uniforms.gameResolution, ctx.canvas.width, ctx.canvas.height);
 
 			gl.bindTexture(gl.TEXTURE_2D, null);
 			gl.activeTexture(gl.TEXTURE0);

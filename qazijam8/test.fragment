@@ -1,4 +1,3 @@
-
 #ifdef GL_ES
 precision highp float;
 #endif
@@ -9,15 +8,12 @@ precision highp float;
 
 uniform float time;
 uniform vec2 resolution;
+uniform vec2 gameResolution;
 uniform sampler2D texture;
 
-float disp (float x) {
-	return max(0.0, min(1.0, smoothstep(-0.1, 1.1, x)));
-	//return pow(x, 2.0);
-	//return sqrt(x);
-}
-vec2 disp (vec2 x) {
-	return vec2(disp(x.x), disp(x.y));
+// greetings to: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+float rand (float n) {
+	return fract(sin(n) * 43758.5453123);
 }
 
 void main (void) {
@@ -25,28 +21,53 @@ void main (void) {
 	vec2 R = resolution.xy;
 	// calculate the size of a pixel
 	float px = 1.0 / R.y;
+	float gpx = 1.0 / gameResolution.y;
+
 	// create percentages of the coordinate system
-	vec2 p = gl_FragCoord.xy / R;
+	//vec2 p = gl_FragCoord.xy / R;
 	// center the scene and add perspective
 	//vec2 uv = (2.0 * gl_FragCoord.xy - R) / min(R.x, R.y);
-
 
 	// i need to do something with p..
 	// i want it to be somewhat like an old tv screen.. well.. its hard to explain actually.
 
-	vec2 uv = p;
+	//vec2 uv = p;
+	//uv = disp(p) * 0.8 + p * 0.2;
 
-	uv = disp(p) * 0.8 + p * 0.2;
+	// greetings to: https://www.shadertoy.com/view/MdlGRB
 
-	vec4 color = texture2D(texture, uv);
-	//color = vec4(uv, color.z, 1.0);
-
-	// lets try creating something like scan lines
-	color = color + smoothstep(0.45, 1.0, mod(uv.y * 3.7132 + (time + uv.x * 0.8) / 6.0, 1.0) / 2.0) * 1.2;
-	color = color + smoothstep(0.45, 1.0, mod(uv.y * 1.13451 + (time + uv.x * (-2.0)) / 10.143, 1.0) / 2.0);
-	//color.x = uv.x;
-	//color.y = uv.y;
+	float dispersion = gpx * 2.0;
+	float distortion = .01;
+	float noisestrength = .1;
+	float bendscale = 1.5;
 	
-	gl_FragColor = color;
+	vec2 uv = gl_FragCoord.xy / resolution.xy;
+	vec2 disp = uv - .5;
+	disp *= sqrt(length(disp));
+	uv += disp * bendscale;
+	uv = (uv + .5) / 2.0;
+	vec2 uvr = uv * (1.0 - dispersion) + dispersion / 2.0;
+	vec2 uvg = uv * 1.0;
+	vec2 uvb = uv * (1.0 + dispersion) - dispersion / 2.0;
+
+	vec3 offset = vec3(rand(uv.y + time), rand(uv.y + time + 123.0), rand(uv.y + time + 7123.1512)) * 0.2;
+	
+	float r = mix(texture2D(texture, vec2(uvr.x, uvr.y) + offset.x * distortion).xyz,
+				   offset, noisestrength).x;
+	float g = mix(texture2D(texture, vec2(uvg.x, uvg.y) + offset.y * distortion).xyz,
+				   offset, noisestrength).y;
+	float b = mix(texture2D(texture, vec2(uvb.x, uvb.y) + offset.z * distortion).xyz,
+				   offset, noisestrength).z;
+	
+	if (uv.x > 0.0 && uv.x < 1.0 && uv.y > 0.0 && uv.y < 1.0) {
+		float stripes = sin(uv.y * 300.0 + time * 10.0);
+		vec3 col = vec3(r, g, b);
+		col = mix(col, vec3(.8), stripes / 80.0);
+		col = col + smoothstep(0.45, 1.0, mod(uv.y * 3.7132 + (time + uv.x * 0.8) / 6.0, 1.0) / 2.0) * 1.2;
+		col = col + smoothstep(0.45, 1.0, mod(uv.y * 1.13451 + (time + uv.x * (-2.0)) / 10.143, 1.0) / 2.0);
+		gl_FragColor = vec4(col, 1.0);
+	} else {
+		gl_FragColor = vec4(0, 0, 0, 1);	
+	}
 }
 

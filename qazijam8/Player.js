@@ -7,22 +7,28 @@
 			name: "Bullet"
 		};
 
-		module.init = (sprites, ents) => {
+		module.init = (sprites, ents, Entity, extend) => {
 			const Bullet = module.exports = function Bullet (x, y, vx, vy) {
+				Entity.call(this, {
+					name: "Bullet"
+				});
 				this.x = x;
 				this.vx = vx * 0.1;
 				this.vy = vy * 0.2 -5;
 				this.y = y;
 				this.ticks = 0;
 				this.variation = Math.random();
-				ents.add(this);
+				this.on("draw", (ctx, x, y) => {
+					this.sprite = sprites.bullets[this.type].getRandom().draw(ctx, this.x | 0, this.y | 0);
+				});
 			};
-			Bullet.prototype.tick = function BulletTick (opts) {
+
+			const p = extend(Bullet, Entity);
+			p.tick = function BulletTick (opts) {
 				this.ticks++;
 				this.type = Math.limit(0, 5, this.ticks / (2 * this.variation +2) / 2 | 0);
 				this.y += this.vy;
 				this.x += this.vx;
-				sprites.bullets[this.type].getRandom().draw(opts.ctx, this.x | 0, this.y | 0);
 				return this.y >= -100;
 			};
 		};
@@ -44,7 +50,7 @@
 				this.on("draw", (ctx, x, y) => {
 					const max = sprites.flames.length - 1;
 					const power = Math.limit(0, max, max-this.power);
-					sprites.flames[power].getRandom().draw(ctx, x, y);
+					this.sprite = sprites.flames[power].getRandom().draw(ctx, x, y);
 				});
 			};
 

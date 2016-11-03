@@ -51,7 +51,30 @@ body.tools canvas, body.tools img {
 	transition: width 1s ease;
 }
 
-#game {
+.screen {
+	width: 100em;
+	/*height: 100em;*/
+	height: 83.78em;
+}
+
+.screen:before {
+	content: "";
+	width: inherit;
+	height: inherit;
+	position: absolute;
+	background-image: url("./tv_small.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: 50%;
+}
+
+.screen #game {
+	margin: 9em;
+	height: 59.5em;
+	width: 81em;
+}
+
+#game-deprecated {
 	background-color: #000;
 	width: 90em;
 	height: 90em;

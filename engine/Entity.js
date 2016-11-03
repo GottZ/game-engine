@@ -19,9 +19,23 @@
 			this.velocity = opts.velocity || 0;
 			this.sprite = opts.sprite;
 			this.data = opts.data || {};
+			this.hits = opts.hits || 0;
 			this.alive = (opts.alive != false);
 			this.children = [];
 			// TODO: Collision
+			// TODO: if texture box hits, check pixel based
+			Object.defineProperty(this, "hl", {
+				get: () => this.x - this.sprite.x
+			});
+			Object.defineProperty(this, "hr", {
+				get: () => this.x - this.sprite.x + this.sprite.width
+			});
+			Object.defineProperty(this, "ht", {
+				get: () => this.y - this.sprite.y
+			});
+			Object.defineProperty(this, "hb", {
+				get: () => this.y - this.sprite.y + this.sprite.height
+			});
 		};
 
 		const p = extend(Entity, EventManager);
@@ -79,16 +93,17 @@
 			for (let i = 0; i < ents.length; i++) {
 				const ent = ents[i];
 				if (!ent.tick(opts)) ents.splice(i--, 1);
+				//else (ent.draw());
 			}
-		};
-		module.exports.add = ent => {
-			ents.push(ent);
 		};
 		module.exports.remove = ent => {
 			const index = ents.indexOf(ent);
 			// TODO: create some debugging tools for throwing debugger; when the console is open etc.
 			if (index == -1) throw new Error("fuck the whut?");
 			ents.splice(index, 1);
+		};
+		module.exports.draw = ctx => {
+			ents.map(ent => ent.draw(ctx));
 		};
 	})();
 })();
