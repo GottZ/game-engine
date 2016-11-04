@@ -8,12 +8,16 @@
 		if (!opts) return node;
 
 		for (let key in opts) {
-			if (key == "parent") continue;
+			if (key == "parent" || key == "style") continue;
 			node[key] = opts[key];
 		}
 
 		if (opts.parent) {
 			opts.parent.appendChild(node);
+		}
+
+		if (opts.style) {
+			Object.keys(opts.style).map(key => node.style[key] = opts.style[key]);
 		}
 
 		return node;

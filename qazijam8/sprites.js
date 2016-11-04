@@ -52,10 +52,14 @@
 
 
 		sprites.turret = new SpriteGroup()
-			.add("down",         ctx.extractSprite(113,  2, 25, 34, 12, 16))
-			.add("left",         ctx.extractSprite( 75,  2, 37, 25, 24, 15))
-			.add("downleft",     ctx.extractSprite( 75, 27, 27, 32, 13, 16))
-			.add("downleftleft", ctx.extractSprite(103, 37, 35, 27, 22, 16));
+			.add("down",         ctx.extractSprite(113,  1, 25, 34, 12, 16)
+				.addAttachment("bezel", 12, 29))
+			.add("left",         ctx.extractSprite( 75,  1, 37, 25, 24, 15)
+				.addAttachment("bezel", 0, 13))
+			.add("downleft",     ctx.extractSprite( 75, 27, 27, 32, 13, 16)
+				.addAttachment("bezel", 4, 24))
+			.add("downleftleft", ctx.extractSprite(103, 36, 35, 27, 22, 16)
+				.addAttachment("bezel", 4, 19));
 
 		sprites.kappa = new SpriteGroup()
 			.add("closedright", ctx.extractSprite(254,  73, 96, 133, 52, 96)
@@ -77,7 +81,7 @@
 			.add("center", ctx.extractSprite(87, 334, 17, 18, 8, 7))
 			.add("left",   ctx.extractSprite(87, 352, 16, 18, 8, 8));
 
-		sprites.unbreakable = (new SpriteGroup()).add("left", ctx.extractSprite(132, 309, 56, 60, 21, 35));
+		sprites.unbreakable = (new SpriteGroup()).add("left", ctx.extractSprite(132, 309, 56, 60, 28, 30));
 		sprites.unbreakable.add("right", sprites.unbreakable.get("left").flip());
 
 		// TODO: add all remaining walls
@@ -115,6 +119,8 @@
 			))
 		);
 		sprites.bullets.map(group => group.add(group.sprites[0].flip()));
+
+		sprites.bullet = ctx.extractSprite(76, 66, 3, 3, 1, 1);
 
 		sprites.flames = [...Array(7)].map((bleh, y) =>
 			new SpriteGroup([...Array(4)].map((bleh, x) =>

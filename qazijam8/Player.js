@@ -8,19 +8,27 @@
 		};
 
 		module.init = (sprites, ents, Entity, extend) => {
-			const Bullet = module.exports = function Bullet (x, y, vx, vy) {
+			const Bullet = module.exports = function Bullet (x, y, vx, vy, enemy) {
 				Entity.call(this, {
 					name: "Bullet"
 				});
+				enemy = this.enemy = enemy || false;
 				this.x = x;
-				this.vx = vx * 0.1;
-				this.vy = vy * 0.2 -5;
+				this.vx = vx;
+				this.vy = vy;
 				this.y = y;
 				this.ticks = 0;
-				this.variation = Math.random();
-				this.on("draw", (ctx, x, y) => {
-					this.sprite = sprites.bullets[this.type].getRandom().draw(ctx, this.x | 0, this.y | 0);
-				});
+				if (!enemy) {
+					this.variation = Math.random();
+					this.on("draw", (ctx, x, y) => {
+						this.sprite = sprites.bullets[this.type].getRandom().draw(ctx, this.x | 0, this.y | 0);
+					});
+				} else {
+					this.sprite = sprites.bullet;
+					this.on("draw", (ctx, x, y) => {
+						this.sprite.draw(ctx, this.x | 0, this.y | 0);
+					});
+				}
 			};
 
 			const p = extend(Bullet, Entity);
@@ -62,7 +70,7 @@
 		name: "Player"
 	};
 
-	module.init = (Entity, Flame, extend, sprites, sounds, Bullet) => {
+	module.init = (Entity, ents, Flame, extend, sprites, sounds, Bullet) => {
 
 		const Player = module.exports = function PlayerEntity (opts) {
 			if (!opts) opts = {};
@@ -75,22 +83,14 @@
 			this.v = 0;
 			this.o = 0;
 
+			this.hits = 50;
+
 			const flames = ["engine1", "engine2"].map(name => this.attach(name, new Flame()));
 
 			this.on("draw", (ctx, x, y) => {
-				let sprite = "center";
-
-				if (Math.abs(this.vx) > 4.5) {
-					sprite = this.vx > 0 ? "rightfast" : "leftfast";
-				}
-				else if (Math.abs(this.vx) > 0.4) {
-					sprite = this.vx > 0 ? "right" : "left";
-				}
-
-				const ship = this.sprite = sprites.ship.get(sprite);
 				// TODO: this.vy should not be -5 - 5
 				flames.map(flame => flame.power = -(this.vy / 5 * 6) | 0);
-				ship.draw(ctx, x, y);
+				this.sprite.draw(ctx, x, y);
 			});
 		}
 
@@ -118,8 +118,46 @@
 			let x = this.x + att.x;
 			let y = this.y + att.y;
 
-			new Bullet(x, y, this.vx, this.vy);
+			new Bullet(x, y, this.vx * 0.1, this.vy * 0.2 - 5);
 		};
+
+		p.tick = function PlayerTick (obj) {
+			let sprite = "center";
+
+			if (Math.abs(this.vx) > 4.5) {
+				sprite = this.vx > 0 ? "rightfast" : "leftfast";
+			}
+			else if (Math.abs(this.vx) > 0.4) {
+				sprite = this.vx > 0 ? "right" : "left";
+			}
+
+			this.sprite = sprites.ship.get(sprite);
+			// TODO: put this somewhere usefull
+			// TODO: seriously.. i should stop crafting such spaghetti code
+			const hits = ents.filter(ent => {
+				if (ent.name != "Bullet" || !ent.enemy || !ent.sprite) return false;
+				if (ent.hl < this.hr && this.hl < ent.hr
+						&& ent.ht < this.hb && this.ht < ent.hb) {
+					return true;
+				}
+				return false;
+			});
+
+			if (hits.length > 0) {
+				this.hits -= hits.length;
+				if (this.hits <= 0) {
+					//ents.remove(this);
+					alert("u died!");
+					location.reload();
+				}
+			}
+
+			hits.map(ent => {
+				ents.remove(ent);
+			});
+
+			return true;
+		}
 
 		window.Player = Player;
 	};

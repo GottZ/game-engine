@@ -20,7 +20,7 @@
 		name: "main"
 	};
 
-	module.init = (stars, input, overrides, Enemy, Player, ents, sprites, console, ressources) => {
+	module.init = (stars, input, Bullet, overrides, Enemy, Player, ents, sprites, console, ressources) => {
 		console.info("main loaded :D");
 
 		const player = new Player();
@@ -189,7 +189,26 @@
 
 			//ctx.drawText("i hope this actually gets somewhere D: so much stuff to do D:", 14, 6);
 			//ctx.drawText("  sadly i did not get this done during qazijam7 :/ so sad :(", 14, 6);
-			ctx.drawText(`  frameTime: ${time.toFixed(4)}\ncurrentTime: ${currentTime.toFixed(4)}\n       ents: ${ents.length}`, 20, 20);
+			ctx.drawText(
+`    frameTime: ${time.toFixed(5)}
+          fps: ${(1000/time).toFixed(2)}
+  currentTime: ${currentTime.toFixed(4)}
+         ents: ${ents.length}
+
+player health: ${player.hits}
+
+so far this is still not a playable game
+however it's getting somewhere.
+
+checkout the code at https://github.com/GottZ/game-engine
+
+
+you can shoot, shots cause stereo sound depending on your position,
+you will be hit by theese bullets and eventually die.
+you can kill the ships on top right.
+
+this code does lots of magic like preloading assets etc. in vanilla js
+i'll continue working on this after qazijam8`, 20, 300);
 
 
 			if (!ingame) {
@@ -206,6 +225,8 @@
 
 				if (fire.pressed) player.fire(ctx);
 
+				new Bullet(200, 200, currentTime * 4 % 10 - 5, currentTime * 1.38612 % 10 - 5, true);
+
 				ents.tick({
 					ctx: ctx,
 					time: time,
@@ -219,7 +240,6 @@
 
 				ents.draw(ctx);
 			}
-
 
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
